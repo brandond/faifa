@@ -2646,7 +2646,7 @@ static int ask_for_frame(u_int16_t *mmtype)
 /**
  * menu - show a menu of the available to send mmtypes
  */
-void menu(faifa_t *faifa)
+void menu(faifa_t *faifa, int opt_mmtype)
 {
 	pthread_t receive_thread;
 	u_int16_t mmtype = 0;
@@ -2658,10 +2658,15 @@ void menu(faifa_t *faifa)
 	}
 	faifa_printf(out_stream, "Started receive thread\n");
 
-	/* Keep asking the user for a mmtype to send */
-	while (ask_for_frame(&mmtype)) {
-		do_frame(faifa, mmtype, faifa->dst_addr, NULL, NULL);
+	if (opt_mmtype >= 0) {
+		do_frame(faifa, opt_mmtype, faifa->dst_addr, NULL, NULL);
 		sleep(1);
+	} else {
+		/* Keep asking the user for a mmtype to send */
+		while (ask_for_frame(&mmtype)) {
+			do_frame(faifa, mmtype, faifa->dst_addr, NULL, NULL);
+			sleep(1);
+		}
 	}
 
 	/* Rejoin the receiving thread */

@@ -84,6 +84,7 @@ static void usage(void)
 {
 	fprintf(stderr, "-i : interface\n"
 			"-m : show menu (no option required)\n"
+			"-t : only send one msg of specified mmtype (hex)\n"
 			"-a : station MAC address\n"
 			"-k : network key\n"
 			"-v : be verbose (default: no)\n"
@@ -93,7 +94,7 @@ static void usage(void)
 			"-h : this help\n");
 }
 
-extern void menu(faifa_t *faifa);
+extern void menu(faifa_t *faifa, int opt_mmtype);
 extern void set_key(char *macaddr);
 
 /**
@@ -109,6 +110,7 @@ int main(int argc, char **argv)
 	char *opt_err_stream = NULL;
 	char *opt_out_stream = NULL;
 	char *opt_in_stream = NULL;
+	int opt_mmtype = -1;
 	int opt_verbose = 0;
 	int c;
 	int ret = 0;
@@ -121,7 +123,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	while ((c = getopt(argc, argv, "i:ma:k:ve:o:s:h")) != -1) {
+	while ((c = getopt(argc, argv, "i:ma:k:ve:o:s:t:h")) != -1) {
 		switch (c) {
 			case 'i':
 				opt_ifname = optarg;
@@ -146,6 +148,14 @@ int main(int argc, char **argv)
 				break;
 			case 's':
 				opt_in_stream = optarg;
+				break;
+			case 't':
+				ret = sscanf(optarg, "%4x", &opt_mmtype);
+				if (ret < 1) {
+					error("can't parse -t argument");
+					return -1;
+				}
+				ret = 0;
 				break;
 			case 'h':
 			default:
@@ -216,8 +226,11 @@ int main(int argc, char **argv)
 		faifa_set_dst_addr(faifa, addr);
 	}
 
-	if (opt_interactive)
-		menu(faifa);
+	if (opt_interactive) {
+		menu(faifa, -1);
+	} else if (opt_mmtype) {
+		menu(faifa, opt_mmtype);
+	}
 
 out_error:
 	faifa_close(faifa);
