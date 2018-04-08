@@ -267,6 +267,11 @@ int faifa_loop(faifa_t *faifa, faifa_loop_handler_t handler, void *user)
 	return n;
 }
 
+void faifa_breakloop(faifa_t *faifa)
+{
+	pcap_breakloop(faifa->pcap);
+}
+
 
 int faifa_close(faifa_t *faifa)
 {

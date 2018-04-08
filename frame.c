@@ -2669,6 +2669,8 @@ void menu(faifa_t *faifa, int opt_mmtype)
 		}
 	}
 
+	faifa_breakloop(faifa);
+
 	/* Rejoin the receiving thread */
 	if (pthread_join(receive_thread, NULL)) {
 		perror("error joining thread");

@@ -142,6 +142,11 @@ typedef void (*faifa_loop_handler_t)(faifa_t *faifa, void *buf, int len, void *u
  */
 extern int faifa_loop(faifa_t *faifa, faifa_loop_handler_t handler, void *user);
 
+/**
+ * faifa_breakloop - break the faifa_loop (call from another thread)
+ * @faifa: private handle
+ */
+extern void faifa_breakloop(faifa_t *faifa);
 
 extern int faifa_sprint_hex(char *str, void *buf, int len, char *sep);
 
