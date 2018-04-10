@@ -2650,6 +2650,13 @@ void menu(faifa_t *faifa, int opt_mmtype)
 {
 	pthread_t receive_thread;
 	u_int16_t mmtype = 0;
+	u_int8_t src_addr[ETHER_ADDR_LEN];
+
+	if(faifa_get_hwaddr(faifa, src_addr)) {
+		faifa_printf(err_stream, "Can't get hardware address for interface (%s)\n",
+				faifa_error(faifa));
+		abort();
+	}
 
 	/* Create a receiving thread */
 	if (pthread_create(&receive_thread, NULL, (void *)receive_loop, faifa)) {
@@ -2659,12 +2666,12 @@ void menu(faifa_t *faifa, int opt_mmtype)
 	faifa_printf(out_stream, "Started receive thread\n");
 
 	if (opt_mmtype >= 0) {
-		do_frame(faifa, opt_mmtype, faifa->dst_addr, NULL, NULL);
+		do_frame(faifa, opt_mmtype, faifa->dst_addr, src_addr, NULL);
 		sleep(1);
 	} else {
 		/* Keep asking the user for a mmtype to send */
 		while (ask_for_frame(&mmtype)) {
-			do_frame(faifa, mmtype, faifa->dst_addr, NULL, NULL);
+			do_frame(faifa, mmtype, faifa->dst_addr, src_addr, NULL);
 			sleep(1);
 		}
 	}

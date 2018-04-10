@@ -61,6 +61,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 
 #include "faifa.h"
 #include "faifa_compat.h"
@@ -128,7 +129,7 @@ int faifa_open(faifa_t *faifa, char *name)
 	}
 
 	/* Use open_live on Unixes */
-	faifa->pcap = pcap_open_live(name, pcap_snaplen, 1, 100, pcap_errbuf);
+	faifa->pcap = pcap_open_live(name, pcap_snaplen, 0, 100, pcap_errbuf);
 #else
 	pcap_if_t *alldevs;
 	pcap_if_t *d;
@@ -297,15 +298,12 @@ int faifa_sprint_hex(char *str, void *buf, int len, char *sep)
 	return (pstr - str);
 }
 
-
-#ifdef __IS_THIS_REALLY_NEEDED__
-
 int faifa_get_hwaddr(faifa_t *faifa, u_int8_t *hwaddr)
 {
 	int fd;
 	struct ifreq ifr;
 
-	fd = socket(AF_INET, SOCK_DRAM, 0);
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd == -1) {
 		faifa_set_error(faifa, "socket: %s", strerror(errno));
 		goto __error_socket;
@@ -318,7 +316,7 @@ int faifa_get_hwaddr(faifa_t *faifa, u_int8_t *hwaddr)
 		faifa_set_error(faifa, "ioctl: %s", strerror(errno));
 		goto __error_ioctl;
 	}
-	memcpy(hwaddr, &(ifr.ifr_hwaddr), ETHER_ADDR_LEN);
+	memcpy(hwaddr, &(ifr.ifr_hwaddr.sa_data), ETHER_ADDR_LEN);
 
 	close(fd);
 
@@ -329,8 +327,6 @@ __error_ioctl:
 __error_socket:
 	return -1;
 }
-
-#endif /* __IS_THIS_REALLY_NEEDED__ */
 
 int faifa_parse_mac_addr(faifa_t *faifa, const char *mac, u_int8_t *addr)
 {

@@ -150,6 +150,8 @@ extern void faifa_breakloop(faifa_t *faifa);
 
 extern int faifa_sprint_hex(char *str, void *buf, int len, char *sep);
 
+extern int faifa_get_hwaddr(faifa_t *faifa, u_int8_t *hwaddr);
+
 /**
  * faifa_parse_mac_addr - parses a MAC address
  * @faifa: private handle
