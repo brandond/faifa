@@ -55,6 +55,7 @@
 #include <net/ethernet.h>
 #endif
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2602,12 +2603,20 @@ void do_receive_frame(faifa_t *faifa, void *buf, int len, void *UNUSED(user))
 		dump_hex_blob(faifa, frame_ptr, frame_len);
 }
 
+void receive_signal(int signal)
+{
+}
+
 /**
  * open_pcap_loop - open a network interface in PCAP loop mode
  * @arg:	unused
  */
 void *receive_loop(faifa_t *faifa)
 {
+	if(signal(SIGINT, receive_signal) == SIG_ERR) {
+		fprintf(stderr, "Can't install signal handler\n");
+	}
+
 	faifa_loop(faifa, (void *)do_receive_frame, faifa);
 
 	return faifa;
@@ -2682,6 +2691,7 @@ void menu(faifa_t *faifa, int opt_mmtype)
 	}
 
 	faifa_breakloop(faifa);
+	pthread_kill(receive_thread, SIGINT);
 
 	/* Rejoin the receiving thread */
 	if (pthread_join(receive_thread, NULL)) {
