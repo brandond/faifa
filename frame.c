@@ -2586,8 +2586,10 @@ void do_receive_frame(faifa_t *faifa, void *buf, int len, void *UNUSED(user))
 	if (!(*eth_type == ntohs(ETHERTYPE_HOMEPLUG)) && !(*eth_type == ntohs(ETHERTYPE_HOMEPLUG_AV)))
 		return;
 
-	/* Check source address */
-	if (memcmp(eth_header->ether_shost, faifa->dst_addr, ETHER_ADDR_LEN)) {
+	/* Check source address, unless we sent to either of the broadcast addresses */
+	if (memcmp(broadcast_macaddr, faifa->dst_addr, ETHER_ADDR_LEN) &&
+            memcmp(hpav_intellon_macaddr, faifa->dst_addr, ETHER_ADDR_LEN) &&
+	    memcmp(eth_header->ether_shost, faifa->dst_addr, ETHER_ADDR_LEN)) {
 		return;
 	}
 
